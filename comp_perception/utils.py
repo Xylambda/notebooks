@@ -66,6 +66,26 @@ def add_noise(img, mean=0, std=1, cast=True):
     return noisy_img
 
 
+def get_sketch(img, contour):
+    """
+    Create a sketch-like image given an image and its edges (contours)
+    
+    Parameters
+    ----------
+    img : numpy.array
+        Image to get sketch from.
+    contour : numpy.array
+        Contour (edges) of the image.
+        
+    Returns
+    -------
+    sketch : numpy.array
+        Sketch-like image.
+    """
+    sketch = img * contour
+    return np.clip(sketch, 0, 1)
+
+
 @jit(nopython=False)
 def adaptive_median_filter(img, kernel_size=3):
     """
