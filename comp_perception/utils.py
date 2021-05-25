@@ -1,6 +1,7 @@
 import numpy as np
 from numba import jit
 from scipy import ndimage
+from skimage.color import rgb2gray
 
 
 def add_salt_pepper(image, prob):
@@ -318,3 +319,155 @@ def fourier_transform_denoising(img, n_components=1000):
         filtered_list.append(res)
     
     return sum(filtered_list)
+
+
+# ----------- Morphologic operations
+def thresholding(img, umbral):
+    """
+    Umbralize (thresholding) operation.
+    
+    Parameters
+    ----------
+    img : numpy.array
+    umbral : scalar
+        Threshold.
+        
+    Returns
+    -------
+    np.array
+        Umbralized image.
+    """
+    img_grey = rgb2gray(img)
+    
+    above = np.where(img_grey > umbral, 255, img_grey)
+    below_equal = np.where(img_grey <= umbral, 0, above)
+    
+    return below_equal
+
+
+def dilate(img, kernel_size=3):
+    """
+    Dilate operation.
+    
+    Parameters
+    ----------
+    img : numpy.array
+    kernel_size : int
+    
+    Returns
+    -------
+    out : numpy.array
+    """
+    h,w = img.shape
+    
+    # Zero padding
+    pad = kernel_size // 2
+    out = np.zeros((h + 2*pad, w + 2*pad), dtype=float)
+    out[pad:pad+h, pad:pad+w] = img.copy().astype(float)
+    
+    se = np.array([[255,255,255],[255,255,255],[255,255,255]])
+    
+    for y in range(h):
+        for x in range (w):
+            mask = out[y:y+kernel_size, x:x+kernel_size] == se
+            
+            try:
+                cond = mask.any()
+            except:
+                cond = mask
+            
+            if cond:
+                out[y,x] = 255
+    
+    out = out[pad:pad+h, pad:pad+w].astype(np.uint8)
+                
+    return out
+
+
+def erosion(img, kernel_size=3):
+    """
+    Erosion operation.
+    
+    Parameters
+    ----------
+    img : numpy.array
+    kernel_size : int
+    
+    Returns
+    -------
+    out : numpy.array
+    """
+    h,w = img.shape
+    
+    # Zero padding
+    pad = kernel_size//2
+    out = np.zeros((h + 2*pad,w + 2*pad),dtype=float)
+    out[pad:pad+h,pad:pad+w] = img.copy().astype(float)
+    
+    se = np.array([[255,255,255],[255,255,255],[255,255,255]])
+    
+    for y in range(h):
+        for x in range (w):
+            comparition = out[y:y+kernel_size,x:x+kernel_size] == se
+            if comparition.all():
+                out[y,x] = 255
+            else:
+                out[y,x] = 0
+    
+    out = out[pad:pad+h,pad:pad+w].astype(np.uint8)
+                
+    return out
+
+
+def opening(img):
+    """
+    Opening operation.
+    
+    Parameters
+    ----------
+    img : numpy.array
+    
+    Returns
+    -------
+    np.array
+    """
+    eroded = erosion(img)
+    dilated = dilate(eroded)
+    
+    return dilated
+
+
+def closing(img):
+    """
+    Closing operation.
+    
+    Parameters
+    ----------
+    img : numpy.array
+    
+    Returns
+    -------
+    np.array
+    """
+    dilated = dilate(img)
+    eroded = erosion(dilated)
+    
+    return eroded
+
+
+def gradient(img):
+    """
+    Gradient operation.
+    
+    Parameters
+    ----------
+    img : numpy.array
+    
+    Returns
+    -------
+    np.array
+    """
+    eroded = erosion(img)
+    dilated = dilate(img)
+    
+    return eroded - dilated
