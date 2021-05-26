@@ -329,6 +329,7 @@ def thresholding(img, umbral):
     Parameters
     ----------
     img : numpy.array
+        Image to apply operation to.
     umbral : scalar
         Threshold.
         
@@ -352,11 +353,14 @@ def dilate(img, kernel_size=3):
     Parameters
     ----------
     img : numpy.array
+        Image to apply operation to.
     kernel_size : int
+        Window (kernel) size.
     
     Returns
     -------
     out : numpy.array
+        Resulting image.
     """
     h,w = img.shape
     
@@ -391,11 +395,14 @@ def erosion(img, kernel_size=3):
     Parameters
     ----------
     img : numpy.array
+        Image to apply operation to.
     kernel_size : int
+        Window (kernel) size.
     
     Returns
     -------
     out : numpy.array
+        Resulting image.
     """
     h,w = img.shape
     
@@ -408,7 +415,7 @@ def erosion(img, kernel_size=3):
     
     for y in range(h):
         for x in range (w):
-            comparition = out[y:y+kernel_size,x:x+kernel_size] == se
+            comparition = out[y:y+kernel_size, x:x+kernel_size] == se
             if comparition.all():
                 out[y,x] = 255
             else:
@@ -426,10 +433,12 @@ def opening(img):
     Parameters
     ----------
     img : numpy.array
+        Image to apply operation to.
     
     Returns
     -------
     np.array
+        Resulting image.
     """
     eroded = erosion(img)
     dilated = dilate(eroded)
@@ -444,10 +453,12 @@ def closing(img):
     Parameters
     ----------
     img : numpy.array
+        Image to apply operation to.
     
     Returns
     -------
     np.array
+        Resulting image.
     """
     dilated = dilate(img)
     eroded = erosion(dilated)
@@ -462,10 +473,12 @@ def gradient(img):
     Parameters
     ----------
     img : numpy.array
+        Image to apply operation to.
     
     Returns
     -------
     np.array
+        Resulting image.
     """
     eroded = erosion(img)
     dilated = dilate(img)
